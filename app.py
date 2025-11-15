@@ -1,65 +1,41 @@
 import pygame
 import sys
+import random
+import time
 
 # 1. Pygame 초기화
 pygame.init()
 
-# --- 화면 설정 ---
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+# --- 화면 및 게임 설정 ---
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 640
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Simple Drawing Pad")
-
-# --- 색상 및 설정 ---
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-DRAW_COLOR = BLACK       # 기본 그리기 색상
-DRAW_SIZE = 5            # 브러시 두께
-current_pos = None       # 현재 마우스 위치
-is_drawing = False       # 그리는 중인지 확인
-
-# --- 초기 화면 ---
-screen.fill(WHITE)
-
-# --- 메인 게임 루프 설정 ---
+pygame.display.set_caption("Pygame Memory Game")
 clock = pygame.time.Clock()
-running = True
+FPS = 30
 
-# --- 메인 루프 ---
-while running:
-    # 60 FPS 설정
-    clock.tick(60)
+# --- 색상 정의 ---
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+CARD_COLOR = (100, 100, 255) # 카드 뒷면 색상
 
-    # 1. 이벤트 처리
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            
-        # --- 마우스 버튼 처리 ---
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # 왼쪽 마우스 버튼 (그리기 시작)
-                is_drawing = True
-                current_pos = event.pos
-            elif event.button == 3: # 오른쪽 마우스 버튼 (화면 지우기)
-                screen.fill(WHITE)
-                current_pos = None # 지우고 나면 현재 위치 초기화
-                
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:  # 왼쪽 마우스 버튼 떼기 (그리기 종료)
-                is_drawing = False
-                current_pos = None
-                
-        elif event.type == pygame.MOUSEMOTION:
-            # 2. 마우스 이동 및 선 그리기
-            if is_drawing:
-                # 이전 위치에서 현재 위치까지 선을 그립니다.
-                if current_pos:
-                    pygame.draw.line(screen, DRAW_COLOR, current_pos, event.pos, DRAW_SIZE)
-                
-                # 현재 위치를 다음 선을 위한 이전 위치로 업데이트
-                current_pos = event.pos
+# --- 게임 상수 ---
+GRID_SIZE = 4
+CARD_COUNT = GRID_SIZE * GRID_SIZE
+CARD_WIDTH = SCREEN_WIDTH // GRID_SIZE
+CARD_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-        # --- 키보드 이벤트 처리 (색상 변경 등) ---
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K
+# --- 카드 내용 (색상) ---
+# 8쌍의 고유한 색상 생성
+UNIQUE_COLORS = [
+    (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
+    (0, 255, 255), (255, 0, 255), (255, 165, 0), (128, 0, 128)
+]
+# 16개의 카드 리스트 (각 색상이 두 번씩)
+card_contents = UNIQUE_COLORS * 2 
+random.shuffle(card_contents) # 무작위로 섞기
+
+# --- 게임 상태 변수 ---
+# 모든 카드가 덮여 있는 상태로 시작 (False: 덮힘, True: 앞면)
+matched_cards = [[False] * GRID_SIZE for _ in range(GRID_SIZE)] 
+revealed_cards =
