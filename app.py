@@ -31,15 +31,21 @@ def check_hit():
 
     press_time = time.time()
     
-    # 마지막 박자 이후 경과 시간
+    # 마지막 박자 이후 경과 시간 (이전 박자 이벤트 이후 시간)
     time_since_last_beat = press_time - st.session_state.last_beat_time
     
-    # 박자 간격에서 벗어난 정도
-    deviation = abs(time_since_last_beat - st.session_state.beat_interval)
-    
-    # 가장 가까운 정박자의 타이밍을 계산
-    # (예: 2.0초 박자일 때, 1.9초에 눌렀으면 -0.1, 2.1초에 눌렀으면 +0.1)
-    
-    # 1. 사용자가 이번 박자를 놓쳤는지 확인 (2.0초 * 1.5배 이상 시간이 지났으면 놓친 것으로 간주)
+    # 1. 사용자가 이번 박자를 놓쳤는지 확인 (다음 박자 간격의 1.5배 이상 시간이 지났으면 놓친 것으로 간주)
     if time_since_last_beat > st.session_state.beat_interval * 1.5:
+        st.session_state.game_message = f"❌ 놓침! 박자가 너무 늦었습니다."
+        st.toast("Too Late!", icon="👎")
+        # 다음 박자 시점을 현재 시점으로 보정
+        st.session_state.last_beat_time = press_time
+        return
+        
+    # 2. 이번 박자의 정중앙 시간 (마지막 박자 시점 + 박자 간격)
+    exact_beat_time = st.session_state.last_beat_time + st.session_state.beat_interval
+    time_diff = abs(press_time - exact_beat_time)
+    
+    if time_diff <= st.session_state.tolerance:
+        # 허용 범위 내에 누름 (성공)
         st.session_state
