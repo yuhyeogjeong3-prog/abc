@@ -1,40 +1,75 @@
 import streamlit as st
+import random
+import time # 게임 루프를 시뮬레이션하기 위해 사용
 
-# --- 초기 설정 ---
-# 'count'가 session_state에 없으면 0으로 초기화합니다.
-if 'count' not in st.session_state:
-    st.session_state.count = 0
+# --- 초기 상태 설정 ---
+def initialize_game_state():
+    """게임 상태를 초기화합니다."""
+    if 'enemy_hp' not in st.session_state:
+        st.session_state.enemy_hp = 100 # 적의 초기 체력
+    if 'player_ammo' not in st.session_state:
+        st.session_state.player_ammo = 10 # 플레이어의 초기 탄약
+    if 'game_message' not in st.session_state:
+        st.session_state.game_message = "게임을 시작합니다! '발사' 버튼을 누르세요."
+    if 'game_over' not in st.session_state:
+        st.session_state.game_over = False
 
-# --- 함수 정의 ---
-def click_button():
-    """클릭 시 점수를 1 증가시키는 함수"""
-    st.session_state.count += 1
-    # 10점마다 보너스 메시지를 추가합니다.
-    if st.session_state.count % 10 == 0:
-        st.toast(f'🎉 보너스! {st.session_state.count}점 달성!', icon='🌟')
+# --- 게임 로직 함수 ---
+
+def shoot():
+    """총알을 발사하는 로직"""
+    if st.session_state.game_over:
+        st.session_state.game_message = "게임이 끝났습니다! '다시 시작'을 눌러주세요."
+        return
+
+    if st.session_state.player_ammo <= 0:
+        st.session_state.game_message = "🚨 탄약이 부족합니다! '재장전'을 하세요."
+        return
+
+    # 탄약 1 감소
+    st.session_state.player_ammo -= 1
+
+    # 데미지 계산 (랜덤하게 10에서 30 사이)
+    damage = random.randint(10, 30)
+
+    # 적 체력 감소
+    st.session_state.enemy_hp -= damage
+
+    # 메시지 업데이트
+    st.session_state.game_message = f"🎯 발사! 적에게 {damage}의 데미지를 입혔습니다."
+
+    # 승리/패배 확인
+    if st.session_state.enemy_hp <= 0:
+        st.session_state.enemy_hp = 0
+        st.session_state.game_message = "🎉 승리! 적을 물리쳤습니다!"
+        st.session_state.game_over = True
+    
+    # 적의 반격 시뮬레이션 (간단하게 메시지로 대체)
+    if not st.session_state.game_over:
+         st.toast("⚡ 적이 반격했습니다!", icon="💥")
+
+
+def reload_ammo():
+    """탄약을 재장전하는 로직"""
+    if st.session_state.game_over:
+        st.session_state.game_message = "게임이 끝났습니다! '다시 시작'을 눌러주세요."
+        return
+        
+    st.session_state.player_ammo = 10
+    st.session_state.game_message = "✅ 탄약을 재장전했습니다! 다시 발사하세요."
 
 def reset_game():
-    """점수를 0으로 초기화하는 함수"""
-    st.session_state.count = 0
-    st.toast('게임을 초기화했습니다!', icon='🔄')
-
+    """게임을 처음 상태로 초기화"""
+    st.session_state.enemy_hp = 100
+    st.session_state.player_ammo = 10
+    st.session_state.game_message = "게임을 다시 시작합니다. 행운을 빌어요!"
+    st.session_state.game_over = False
+    
 # --- Streamlit UI 구성 ---
 
-st.title('🖱️ 간단한 클리커 게임')
-st.caption('버튼을 눌러 점수를 올리세요!')
+st.title('🔫 텍스트 기반 슈팅 시뮬레이션')
+initialize_game_state()
 
-# 현재 점수를 표시합니다.
-st.metric(label="현재 점수", value=st.session_state.count)
-
-# 클리커 버튼
-st.button('클릭해서 점수 올리기!', on_click=click_button)
-
-# 게임 초기화 버튼
-st.button('점수 초기화', on_click=reset_game)
-
-# --- 진행 상황 메시지 (선택 사항) ---
-if st.session_state.count >= 50:
-    st.success('대단해요! 50점 이상입니다!')
-elif st.session_state.count >= 20:
-    st.info('잘하고 있어요! 계속 눌러보세요!')
-
+# 1. 게임 상태 표시
+st.subheader('현재 상태')
+col1, col2 = st.columns
