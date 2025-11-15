@@ -1,41 +1,63 @@
-import pygame
-import sys
 import random
-import time
+import sys
 
-# 1. Pygame 초기화
-pygame.init()
+def guess_number_game():
+    """순수 Python으로 터미널에서 실행되는 숫자 맞추기 게임."""
+    
+    print("====================================")
+    print("🔢 숫자 맞추기 게임을 시작합니다!")
+    print("1부터 100 사이의 숫자를 맞춰보세요.")
+    print("====================================")
 
-# --- 화면 및 게임 설정 ---
-SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 640
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Pygame Memory Game")
-clock = pygame.time.Clock()
-FPS = 30
+    # 1. 정답 숫자 생성
+    try:
+        secret_number = random.randint(1, 100)
+    except ValueError:
+        print("오류: random 모듈 사용에 문제가 있습니다.")
+        return
 
-# --- 색상 정의 ---
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-CARD_COLOR = (100, 100, 255) # 카드 뒷면 색상
+    attempts = 0 # 시도 횟수
+    
+    while True:
+        try:
+            # 2. 사용자 입력 받기
+            guess = input("당신의 추측은? (숫자를 입력하세요): ")
+            
+            # '종료' 명령어 처리
+            if guess.lower() in ('종료', 'exit'):
+                print(f"게임을 종료합니다. 정답은 {secret_number}였습니다.")
+                break
 
-# --- 게임 상수 ---
-GRID_SIZE = 4
-CARD_COUNT = GRID_SIZE * GRID_SIZE
-CARD_WIDTH = SCREEN_WIDTH // GRID_SIZE
-CARD_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
+            # 3. 입력이 유효한 숫자인지 확인
+            try:
+                guess = int(guess)
+            except ValueError:
+                print("⚠️ 유효한 숫자를 입력하거나 '종료'를 입력하세요.")
+                continue
 
-# --- 카드 내용 (색상) ---
-# 8쌍의 고유한 색상 생성
-UNIQUE_COLORS = [
-    (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
-    (0, 255, 255), (255, 0, 255), (255, 165, 0), (128, 0, 128)
-]
-# 16개의 카드 리스트 (각 색상이 두 번씩)
-card_contents = UNIQUE_COLORS * 2 
-random.shuffle(card_contents) # 무작위로 섞기
+            # 4. 범위 확인
+            if guess < 1 or guess > 100:
+                print("⚠️ 1부터 100 사이의 숫자를 입력해야 합니다.")
+                continue
 
-# --- 게임 상태 변수 ---
-# 모든 카드가 덮여 있는 상태로 시작 (False: 덮힘, True: 앞면)
-matched_cards = [[False] * GRID_SIZE for _ in range(GRID_SIZE)] 
-revealed_cards =
+            attempts += 1
+
+            # 5. 정답 확인 및 힌트 제공
+            if guess < secret_number:
+                print("⬆️ 더 높은 숫자입니다!")
+            elif guess > secret_number:
+                print("⬇️ 더 낮은 숫자입니다!")
+            else:
+                # 6. 정답! 게임 종료
+                print("\n🎉🎉🎉 축하합니다! 🎉🎉🎉")
+                print(f"정답은 {secret_number}였습니다.")
+                print(f"총 {attempts}번 만에 맞추셨습니다!")
+                break
+
+        except KeyboardInterrupt:
+            # Ctrl+C로 종료 시 처리
+            print(f"\n\n[프로그램 강제 종료] 정답은 {secret_number}였습니다.")
+            sys.exit()
+
+if __name__ == "__main__":
+    guess_number_game()
