@@ -103,3 +103,24 @@ def game_loop():
 
         # 총알과 적 충돌 체크
         for bullet in bullets:
+            enemy_hit = pygame.sprite.spritecollide(bullet, enemies, True)
+            for enemy in enemy_hit:
+                bullet.kill()
+
+        # 화면 채우기
+        screen.fill(BLACK)
+        
+        # 스프라이트 그리기
+        all_sprites.draw(screen)
+
+        # 화면 업데이트
+        pygame.display.flip()
+
+        # 초당 60프레임 유지
+        clock.tick(60)
+
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    game_loop()
